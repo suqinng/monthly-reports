@@ -757,7 +757,7 @@ new Chart(document.getElementById('onlineChart2'), {
                 borderColor: '#3b82f6', backgroundColor: 'transparent', borderDash: [5, 4],
                 pointBackgroundColor: '#fff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 5,
                 tension: 0.3, yAxisID: 'yL',
-                datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+                datalabels: { display: true, anchor: 'top', align: 'top', offset: 6, color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
             },
             {
                 type: 'line', label: '工单处理时长(min)',
@@ -765,7 +765,7 @@ new Chart(document.getElementById('onlineChart2'), {
                 borderColor: '#f59e0b', backgroundColor: 'transparent', borderDash: [4, 3],
                 pointBackgroundColor: '#fff', pointBorderColor: '#f59e0b', pointBorderWidth: 2, pointRadius: 5,
                 tension: 0.3, yAxisID: 'yR',
-                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', offset: 6, color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
             }
         ]
     },
@@ -823,7 +823,7 @@ new Chart(document.getElementById('phoneChart2'), {
                 borderColor: '#3b82f6', backgroundColor: 'transparent', borderDash: [5, 4],
                 pointBackgroundColor: '#fff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 5,
                 tension: 0.3, yAxisID: 'yL',
-                datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+                datalabels: { display: true, anchor: 'top', align: 'top', offset: 6, color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
             },
             {
                 type: 'line', label: '通话时长(min)',
@@ -831,7 +831,7 @@ new Chart(document.getElementById('phoneChart2'), {
                 borderColor: '#f59e0b', backgroundColor: 'transparent', borderDash: [4, 3],
                 pointBackgroundColor: '#fff', pointBorderColor: '#f59e0b', pointBorderWidth: 2, pointRadius: 5,
                 tension: 0.3, yAxisID: 'yR',
-                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', offset: 6, color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
             }
         ]
     },
