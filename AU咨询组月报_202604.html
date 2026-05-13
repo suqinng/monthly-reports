@@ -289,11 +289,11 @@
     <!-- Charts row 1 -->
     <div class="charts-row">
         <div class="chart-card">
-            <div class="chart-title">呼入量 &amp; 接通率</div>
+            <div class="chart-title">客服人效 &amp; 一次性解决率</div>
             <div class="chart-wrap"><canvas id="phoneChart1"></canvas></div>
         </div>
         <div class="chart-card">
-            <div class="chart-title">满意度 &amp; 一次性解决率 &amp; 通话时长</div>
+            <div class="chart-title">满意度 &amp; 通话时长</div>
             <div class="chart-wrap"><canvas id="phoneChart2"></canvas></div>
         </div>
     </div>
@@ -752,14 +752,6 @@ new Chart(document.getElementById('onlineChart2'), {
         labels: LABELS,
         datasets: [
             {
-                type: 'line', label: '非常满意度(%)',
-                data: [74.17, 74.04, 64.18, 65.63, 63.31],
-                borderColor: '#10b981', backgroundColor: 'transparent',
-                pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointBorderWidth: 2, pointRadius: 5,
-                tension: 0.3, yAxisID: 'yL',
-                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#10b981', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
-            },
-            {
                 type: 'line', label: '客户满意度(%)',
                 data: [90.06, 89.13, 85.07, 85.82, 81.25],
                 borderColor: '#3b82f6', backgroundColor: 'transparent', borderDash: [5, 4],
@@ -781,7 +773,7 @@ new Chart(document.getElementById('onlineChart2'), {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
         scales: {
-            yL: { position: 'left', title: { display: true, text: '%', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT, callback: v => v + '%' }, min: 55, max: 100 },
+            yL: { position: 'left', title: { display: true, text: '%', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT, callback: v => v + '%' }, min: 70, max: 100 },
             yR: { position: 'right', title: { display: true, text: '分钟', font: FONT }, grid: { display: false }, ticks: { font: FONT }, min: 10, max: 16 }
         }
     }
@@ -825,14 +817,6 @@ new Chart(document.getElementById('phoneChart2'), {
     data: {
         labels: LABELS,
         datasets: [
-            {
-                type: 'line', label: '非常满意度(%)',
-                data: [83.81, 84.17, 79.10, 80.76, 74.46],
-                borderColor: '#10b981', backgroundColor: 'transparent',
-                pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointBorderWidth: 2, pointRadius: 5,
-                tension: 0.3, yAxisID: 'yL',
-                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#10b981', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
-            },
             {
                 type: 'line', label: '客户满意度(%)',
                 data: [88.04, 90.27, 84.55, 83.09, 87.80],
