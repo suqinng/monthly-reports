@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AU 咨询组月报 · 2026年4月</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f4f8; color: #1a202c; }
+
+        .report-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); color: white; padding: 36px 40px 28px; }
+        .report-header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+        .report-header .meta { font-size: 13px; color: #94a3b8; margin-top: 6px; }
+
+        .tab-nav { background: white; border-bottom: 2px solid #e2e8f0; padding: 0 40px; display: flex; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+        .tab-btn { padding: 15px 22px; border: none; background: none; cursor: pointer; font-size: 14px; font-weight: 500; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
+        .tab-btn:hover { color: #334155; }
+        .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+
+        .section { display: none; padding: 32px 40px; max-width: 1160px; margin: 0 auto; }
+        .section.active { display: block; }
+
+        /* KPI */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); border-top: 4px solid #e2e8f0; }
+        .kpi-card.green { border-top-color: #10b981; }
+        .kpi-card.red   { border-top-color: #ef4444; }
+        .kpi-card.blue  { border-top-color: #3b82f6; }
+        .kpi-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+        .kpi-value { font-size: 30px; font-weight: 800; line-height: 1; }
+        .kpi-value.green { color: #10b981; }
+        .kpi-value.red   { color: #ef4444; }
+        .kpi-value.blue  { color: #3b82f6; }
+        .kpi-delta { font-size: 12px; margin-top: 7px; color: #64748b; }
+        .kpi-delta .up   { color: #10b981; font-weight: 600; }
+        .kpi-delta .down { color: #ef4444; font-weight: 600; }
+
+        /* Cards */
+        .card { background: white; border-radius: 12px; padding: 24px 26px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 22px; }
+        .card-title { font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 18px; }
+
+        /* Charts */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+        .chart-card { background: white; border-radius: 12px; padding: 20px 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+        .chart-title { font-size: 13px; font-weight: 600; color: #374151; text-align: center; margin-bottom: 12px; }
+        .chart-wrap { position: relative; height: 260px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f8fafc; color: #6b7280; font-weight: 600; padding: 10px 14px; text-align: center; border-bottom: 2px solid #e5e7eb; font-size: 12px; }
+        td { padding: 10px 14px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f9fafb; }
+        .td-left { text-align: left; font-weight: 600; color: #374151; }
+        .col-cur { background: #fffbeb !important; }
+        .c-good { color: #10b981; font-weight: 700; }
+        .c-bad  { color: #ef4444; font-weight: 700; }
+
+        /* Bars */
+        .bar-list { display: flex; flex-direction: column; gap: 10px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; }
+        .bar-lbl { width: 100px; font-size: 12px; color: #555; text-align: right; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 18px; background: #f1f5f9; border-radius: 20px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 20px; }
+        .bf-red    { background: linear-gradient(90deg,#ef4444,#f87171); }
+        .bf-orange { background: linear-gradient(90deg,#f97316,#fb923c); }
+        .bf-blue   { background: linear-gradient(90deg,#3b82f6,#60a5fa); }
+        .bf-indigo { background: linear-gradient(90deg,#6366f1,#818cf8); }
+        .bf-slate  { background: linear-gradient(90deg,#64748b,#94a3b8); }
+        .bar-pct { width: 46px; font-size: 13px; font-weight: 700; color: #1e293b; }
+        .bar-cnt { width: 40px; font-size: 12px; color: #9ca3af; }
+
+        /* Analysis */
+        .analysis-list { display: flex; flex-direction: column; gap: 12px; }
+        .ai { padding: 15px 18px; border-radius: 10px; background: #f8fafc; border-left: 4px solid #3b82f6; }
+        .ai-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .ai-rank { font-size: 11px; color: #9ca3af; }
+        .ai-title { font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+        .ai-pct { font-size: 22px; font-weight: 800; }
+        .ai-desc { font-size: 13px; color: #4b5563; line-height: 1.65; margin-bottom: 6px; }
+        .ai-complaint { font-size: 12px; color: #374151; background: white; padding: 8px 12px; border-radius: 6px; line-height: 1.7; margin-bottom: 6px; }
+        .ai-action { font-size: 12px; color: #2563eb; background: #eff6ff; padding: 6px 11px; border-radius: 6px; display: inline-block; }
+
+        /* Quality section */
+        .qc-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+        .qc-card { background: white; border-radius: 12px; padding: 22px 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+        .qc-card.bad-card { border: 1.5px solid #fecaca; background: #fff5f5; }
+        .qc-card.good-card { border: 1.5px solid #bbf7d0; background: #f0fdf4; }
+        .qc-icon { font-size: 20px; margin-bottom: 8px; }
+        .qc-name { font-size: 13px; color: #6b7280; margin-bottom: 6px; }
+        .qc-val { font-size: 32px; font-weight: 800; }
+        .qc-val.bad  { color: #ef4444; }
+        .qc-val.good { color: #10b981; }
+        .qc-target { font-size: 12px; margin-top: 6px; }
+        .qc-target.bad  { color: #ef4444; }
+        .qc-target.good { color: #10b981; }
+
+        /* Actions */
+        .callout { padding: 14px 18px; border-radius: 10px; margin-bottom: 16px; display: flex; gap: 12px; font-size: 13px; line-height: 1.7; }
+        .callout.danger { background: #fef2f2; border: 1px solid #fecaca; }
+        .callout.warn   { background: #fff7ed; border: 1px solid #fed7aa; }
+        .callout.info   { background: #eff6ff; border: 1px solid #bfdbfe; }
+        .callout-icon { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+        .callout-text strong { color: #1e293b; display: block; margin-bottom: 3px; }
+        .callout-text { color: #4b5563; }
+        .action-card { background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 16px; display: flex; gap: 16px; }
+        .ac-num { width: 32px; height: 32px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+        .ac-body { flex: 1; }
+        .ac-title { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+        .ac-desc { font-size: 13px; color: #4b5563; line-height: 1.7; }
+        .ac-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .ac-tag { font-size: 11px; color: #6b7280; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; }
+        .ac-warn { font-size: 12px; color: #b45309; background: #fff7ed; padding: 7px 12px; border-radius: 6px; margin-top: 8px; }
+        .sh { font-size: 16px; font-weight: 700; color: #1e293b; margin: 28px 0 16px; display: flex; align-items: center; gap: 8px; }
+        .sh:after { content:''; flex:1; height:1px; background:#e2e8f0; margin-left:12px; }
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+
+        /* QC section heading style */
+        .section-heading { font-size: 17px; font-weight: 700; color: #1e293b; padding: 0 0 14px; margin-bottom: 20px; border-bottom: 3px solid #ef4444; display: flex; align-items: center; gap: 10px; }
+
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-red   { background: #fee2e2; color: #dc2626; }
+        .badge-green { background: #d1fae5; color: #059669; }
+        .report-footer { text-align: center; padding: 28px; color: #94a3b8; font-size: 12px; }
+        @media (max-width: 800px) { .charts-row, .g2, .qc-cards { grid-template-columns: 1fr; } .section { padding: 20px; } }
+    </style>
+</head>
+<body>
+
+<header class="report-header">
+    <h1>🇦🇺 AU 咨询组月报 &nbsp;·&nbsp; 2026年4月</h1>
+    <div class="meta">数据周期: 2026-04-01 ~ 2026-04-30 &nbsp;|&nbsp; 生成时间: 2026-05-13</div>
+</header>
+
+<nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('online',this)">💬 在线咨询</button>
+    <button class="tab-btn" onclick="switchTab('phone',this)">📞 电话咨询</button>
+    <button class="tab-btn" onclick="switchTab('qc',this)">🔍 质检差错</button>
+    <button class="tab-btn" onclick="switchTab('summary',this)">📋 问题分析与行动</button>
+</nav>
+
+
+<!-- ══════════════════════════════════════════════
+     在线咨询
+══════════════════════════════════════════════ -->
+<div id="online" class="section active">
+
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-label">💬 月咨询量</div>
+            <div class="kpi-value blue">1,911</div>
+            <div class="kpi-delta"><span class="up">▲ +191单 &nbsp;+11.1%</span> &nbsp;vs 3月 1,720单</div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">⚡ 30秒接通率</div>
+            <div class="kpi-value red">89.62%</div>
+            <div class="kpi-delta"><span class="down">▼ −8.95pp</span> &nbsp;vs 3月 98.57%&nbsp;&nbsp;<span class="badge badge-red">未达标</span></div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">⭐ 非常满意度</div>
+            <div class="kpi-value red">63.31%</div>
+            <div class="kpi-delta"><span class="down">▼ −2.32pp</span> &nbsp;vs 3月 &nbsp;目标 ≥80%&nbsp;&nbsp;<span class="badge badge-red">未达标</span></div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">⚠️ 质检差错率</div>
+            <div class="kpi-value red">2.65%</div>
+            <div class="kpi-delta"><span class="down">▲ +1.66pp</span> &nbsp;vs 3月 &nbsp;目标 &lt;1%&nbsp;&nbsp;<span class="badge badge-red">超标</span></div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title">客服人效 &amp; 一次性解决率</div>
+            <div class="chart-wrap"><canvas id="onlineChart1"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">满意度 &amp; 一次性解决率 &amp; 工单处理时长</div>
+            <div class="chart-wrap"><canvas id="onlineChart2"></canvas></div>
+        </div>
+    </div>
+
+    <!-- 人效表 -->
+    <div class="card">
+        <div class="card-title">👥 人效服务模型（近5月）</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:left">相关指标</th>
+                    <th>25年12月</th><th>26年1月</th><th>26年2月</th><th>26年3月</th>
+                    <th class="col-cur">26年4月</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="td-left">客服人效</td><td>138</td><td>129</td><td>140</td><td>151</td><td class="col-cur" style="font-weight:700">153</td></tr>
+                <tr><td class="td-left">测算客服数</td><td>6</td><td>6</td><td>6</td><td>6</td><td class="col-cur">6</td></tr>
+                <tr><td class="td-left">实际在岗客服数</td><td>5</td><td>9</td><td>9</td><td>8</td><td class="col-cur c-bad" style="font-size:15px">4</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="g2">
+        <!-- 不满意分布 -->
+        <div class="card">
+            <div class="card-title">😞 不满意原因分布（4月，共 85 单）</div>
+            <div class="bar-list">
+                <div class="bar-row"><div class="bar-lbl">入金类</div><div class="bar-track"><div class="bar-fill bf-red" style="width:21.2%"></div></div><div class="bar-pct">21.2%</div><div class="bar-cnt">18单</div></div>
+                <div class="bar-row"><div class="bar-lbl">交易类</div><div class="bar-track"><div class="bar-fill bf-orange" style="width:17.6%"></div></div><div class="bar-pct">17.6%</div><div class="bar-cnt">15单</div></div>
+                <div class="bar-row"><div class="bar-lbl">开户/销户类</div><div class="bar-track"><div class="bar-fill bf-blue" style="width:16.5%"></div></div><div class="bar-pct">16.5%</div><div class="bar-cnt">14单</div></div>
+                <div class="bar-row"><div class="bar-lbl">出金类</div><div class="bar-track"><div class="bar-fill bf-indigo" style="width:14.1%"></div></div><div class="bar-pct">14.1%</div><div class="bar-cnt">12单</div></div>
+                <div class="bar-row"><div class="bar-lbl">转仓类</div><div class="bar-track"><div class="bar-fill bf-slate" style="width:9.4%"></div></div><div class="bar-pct">9.4%</div><div class="bar-cnt">8单</div></div>
+            </div>
+        </div>
+        <!-- 不满意详解 -->
+        <div class="card">
+            <div class="card-title">🔍 不满意原因详解</div>
+            <div class="analysis-list">
+                <div class="ai" style="border-left-color:#ef4444">
+                    <div class="ai-head"><div><div class="ai-rank">1️⃣ 第1位</div><div class="ai-title">入金类</div></div><div class="ai-pct" style="color:#ef4444">21.2%</div></div>
+                    <div class="ai-desc">18单，客户反复进线咨询。</div>
+                    <div class="ai-complaint">📋 入金进度催促、入金异常、电汇操作疑问</div>
+                    <span class="ai-action">💡 优化入金进度提示话术，增加自助查询入口，统一时效告知标准</span>
+                </div>
+                <div class="ai" style="border-left-color:#f97316">
+                    <div class="ai-head"><div><div class="ai-rank">2️⃣ 第2位</div><div class="ai-title">交易类</div></div><div class="ai-pct" style="color:#f97316">17.6%</div></div>
+                    <div class="ai-desc">15单，交易类工单为第二高频业务。</div>
+                    <div class="ai-complaint">📋 期权等级疑问、美股交易规则、交易密码问题</div>
+                </div>
+                <div class="ai" style="border-left-color:#3b82f6">
+                    <div class="ai-head"><div><div class="ai-rank">3️⃣ 第3位</div><div class="ai-title">开户 / 销户类</div></div><div class="ai-pct" style="color:#3b82f6">16.5%</div></div>
+                    <div class="ai-desc">14单。</div>
+                    <div class="ai-complaint">📋 开户驳回原因不清、开户流程复杂</div>
+                    <span class="ai-action">💡 优化驳回通知模板</span>
+                </div>
+                <div class="ai" style="border-left-color:#6366f1">
+                    <div class="ai-head"><div><div class="ai-rank">4️⃣ 第4位</div><div class="ai-title">出金类</div></div><div class="ai-pct" style="color:#6366f1">14.1%</div></div>
+                    <div class="ai-desc">12单。</div>
+                    <div class="ai-complaint">📋 出金进度查询、出金异常、NZ出金流程</div>
+                    <span class="ai-action">💡 与入金类同步优化资金类SOP，增加出金进度主动推送</span>
+                </div>
+                <div class="ai" style="border-left-color:#64748b">
+                    <div class="ai-head"><div><div class="ai-rank">5️⃣ 第5位</div><div class="ai-title">转仓类</div></div><div class="ai-pct" style="color:#64748b">9.4%</div></div>
+                    <div class="ai-desc">8单，反复进线咨询转入和转出进度。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     电话咨询
+══════════════════════════════════════════════ -->
+<div id="phone" class="section">
+
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-label">📞 月电话呼入量</div>
+            <div class="kpi-value blue">↑ 3.76%</div>
+            <div class="kpi-delta"><span class="up">▲ 较上月上涨 3.76%</span></div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">📶 接通率</div>
+            <div class="kpi-value red">↓ 17.69%</div>
+            <div class="kpi-delta"><span class="down">▼ 环比下降 17.69%</span>&nbsp;&nbsp;<span class="badge badge-red">未达标</span></div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-label">⭐ 非常满意度</div>
+            <div class="kpi-value red">74.46%</div>
+            <div class="kpi-delta"><span class="down">▼ −6.30pp</span> &nbsp;vs 3月 &nbsp;目标 ≥90%&nbsp;&nbsp;<span class="badge badge-red">未达标</span></div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-label">⚠️ 质检差错率</div>
+            <div class="kpi-value green">0.90%</div>
+            <div class="kpi-delta"><span class="up">▲ +0.70pp</span> &nbsp;vs 3月 &nbsp;目标 &lt;1%&nbsp;&nbsp;<span class="badge badge-green">达标</span></div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title">客服人效 &amp; 一次性解决率</div>
+            <div class="chart-wrap"><canvas id="phoneChart1"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title">满意度 &amp; 一次性解决率 &amp; 通话时长</div>
+            <div class="chart-wrap"><canvas id="phoneChart2"></canvas></div>
+        </div>
+    </div>
+
+    <!-- 人效表 -->
+    <div class="card">
+        <div class="card-title">👥 人效服务模型（近5月）</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:left">相关指标</th>
+                    <th>25年12月</th><th>26年1月</th><th>26年2月</th><th>26年3月</th>
+                    <th class="col-cur">26年4月</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="td-left">客服人效</td><td>71</td><td>67</td><td>70</td><td>74</td><td class="col-cur" style="font-weight:700">75</td></tr>
+                <tr><td class="td-left">测算客服数</td><td>7</td><td>7</td><td>7</td><td>7</td><td class="col-cur">8</td></tr>
+                <tr><td class="td-left">实际在岗客服数</td><td>4</td><td>5</td><td>7</td><td>6</td><td class="col-cur" style="font-weight:700">5</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="g2">
+        <div class="card">
+            <div class="card-title">😞 不满意原因分布（4月，共 40 单）</div>
+            <div class="bar-list">
+                <div class="bar-row"><div class="bar-lbl">入金类</div><div class="bar-track"><div class="bar-fill bf-red" style="width:30%"></div></div><div class="bar-pct">30.0%</div><div class="bar-cnt">12单</div></div>
+                <div class="bar-row"><div class="bar-lbl">开户类</div><div class="bar-track"><div class="bar-fill bf-orange" style="width:15%"></div></div><div class="bar-pct">15.0%</div><div class="bar-cnt">6单</div></div>
+                <div class="bar-row"><div class="bar-lbl">交易/订单类</div><div class="bar-track"><div class="bar-fill bf-blue" style="width:12.5%"></div></div><div class="bar-pct">12.5%</div><div class="bar-cnt">5单</div></div>
+                <div class="bar-row"><div class="bar-lbl">平台/登录类</div><div class="bar-track"><div class="bar-fill bf-indigo" style="width:10%"></div></div><div class="bar-pct">10.0%</div><div class="bar-cnt">4单</div></div>
+                <div class="bar-row"><div class="bar-lbl">出金类</div><div class="bar-track"><div class="bar-fill bf-slate" style="width:7.5%"></div></div><div class="bar-pct">7.5%</div><div class="bar-cnt">3单</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🔍 不满意原因详解</div>
+            <div class="analysis-list">
+                <div class="ai" style="border-left-color:#ef4444">
+                    <div class="ai-head"><div><div class="ai-rank">1️⃣ 第1位</div><div class="ai-title">入金类</div></div><div class="ai-pct" style="color:#ef4444">30.0%</div></div>
+                    <div class="ai-desc">12单，为各类别最高。</div>
+                    <div class="ai-complaint">📋 入金进度催促（电汇澳元）、第三方入金异常、入金进度查询无结果</div>
+                </div>
+                <div class="ai" style="border-left-color:#f97316">
+                    <div class="ai-head"><div><div class="ai-rank">2️⃣ 第2位</div><div class="ai-title">开户类</div></div><div class="ai-pct" style="color:#f97316">15.0%</div></div>
+                    <div class="ai-desc">6单。</div>
+                    <div class="ai-complaint">📋 开户前咨询未转化、开户驳回原因不清、催开户进度</div>
+                </div>
+                <div class="ai" style="border-left-color:#3b82f6">
+                    <div class="ai-head"><div><div class="ai-rank">3️⃣ 第3位</div><div class="ai-title">交易 / 订单类</div></div><div class="ai-pct" style="color:#3b82f6">12.5%</div></div>
+                    <div class="ai-desc">5单。</div>
+                    <div class="ai-complaint">📋 订单状态查询、美股/澳股交易规则疑问</div>
+                </div>
+                <div class="ai" style="border-left-color:#6366f1">
+                    <div class="ai-head"><div><div class="ai-rank">4️⃣ 第4位</div><div class="ai-title">平台 / 登录类</div></div><div class="ai-pct" style="color:#6366f1">10.0%</div></div>
+                    <div class="ai-desc">4单。</div>
+                    <div class="ai-complaint">📋 账户被锁、登录异常、平台基础操作问题</div>
+                </div>
+                <div class="ai" style="border-left-color:#64748b">
+                    <div class="ai-head"><div><div class="ai-rank">5️⃣ 第5位</div><div class="ai-title">出金类</div></div><div class="ai-pct" style="color:#64748b">7.5%</div></div>
+                    <div class="ai-desc">3单。</div>
+                    <div class="ai-complaint">📋 出金操作流程、出金进度查询</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     质检差错
+══════════════════════════════════════════════ -->
+<div id="qc" class="section">
+
+    <div class="section-heading">🔍 质检差错</div>
+
+    <div class="qc-cards">
+        <div class="qc-card bad-card">
+            <div class="qc-icon">💬</div>
+            <div class="qc-name">在线质检差错率</div>
+            <div class="qc-val bad">2.65%</div>
+            <div class="qc-target bad">目标 ≤1%&nbsp;&nbsp;▲ 超标</div>
+        </div>
+        <div class="qc-card good-card">
+            <div class="qc-icon">📞</div>
+            <div class="qc-name">电话质检差错率</div>
+            <div class="qc-val good">0.90%</div>
+            <div class="qc-target good">目标 ≤1%&nbsp;&nbsp;✓ 达标</div>
+        </div>
+        <div class="qc-card" style="background:#f8fafc;border:1.5px solid #e2e8f0">
+            <div class="qc-icon">📊</div>
+            <div class="qc-name">在线差错率趋势</div>
+            <div class="qc-val" style="color:#f97316;font-size:22px">0.33% → 2.65%</div>
+            <div class="qc-target" style="color:#f97316">▲ 近5月持续上升，需重点关注</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📈 在线 &amp; 电话质检差错率趋势（近5月）</div>
+        <div class="chart-wrap" style="height:300px"><canvas id="qcChart"></canvas></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title" style="font-size:16px;font-weight:800;color:#1e293b;margin-bottom:20px">1.1 在线差错类别分布</div>
+        <table class="error-table">
+            <thead>
+                <tr>
+                    <th style="text-align:left;font-size:13px;font-weight:600;color:#374151;padding:12px 16px;border-bottom:2px solid #e5e7eb;background:white">差错大类</th>
+                    <th style="font-size:13px;font-weight:600;color:#374151;padding:12px 16px;border-bottom:2px solid #e5e7eb;width:100px;background:white">数量</th>
+                    <th style="font-size:13px;font-weight:600;color:#374151;padding:12px 16px;border-bottom:2px solid #e5e7eb;width:100px;background:white">占比</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b">六、专业解答（J类）</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b">4</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:700;color:#ef4444">40%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b">二、服务沟通规范（B/C类）</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b">3</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:700;color:#f97316">30%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b">五、处理流程（H类）</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b">2</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:700;color:#f59e0b">20%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#1e293b">四、核实合规类（F类）</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:600;color:#1e293b">1</td>
+                    <td style="padding:13px 16px;border-bottom:1px solid #f1f5f9;font-size:14px;font-weight:700;color:#64748b">10%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:none;font-size:14px;color:#1e293b">一、服务用语（A类）</td>
+                    <td style="padding:13px 16px;border-bottom:none;font-size:14px;font-weight:600;color:#1e293b">1</td>
+                    <td style="padding:13px 16px;border-bottom:none;font-size:14px;font-weight:700;color:#64748b">10%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-title" style="font-size:16px;font-weight:800;color:#1e293b;margin-bottom:20px">2.1 电话差错类别分布</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:left;font-size:13px;font-weight:600;color:#374151;padding:12px 16px;border-bottom:2px solid #e5e7eb;background:white">差错大类</th>
+                    <th style="font-size:13px;font-weight:600;color:#374151;padding:12px 16px;border-bottom:2px solid #e5e7eb;width:100px;background:white">数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align:left;padding:13px 16px;border-bottom:none;font-size:14px;color:#1e293b">四、核实合规类（F类）</td>
+                    <td style="padding:13px 16px;border-bottom:none;font-size:14px;font-weight:600;color:#1e293b">1</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-title" style="font-size:16px;font-weight:800;color:#1e293b;margin-bottom:20px">3. 人员质检数据</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align:left;background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">客服英文名</th>
+                    <th style="background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">已完成质检单数量</th>
+                    <th style="background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">致命单数量</th>
+                    <th style="background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">致命性差错率（实际）</th>
+                    <th style="background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">非致命单数量</th>
+                    <th style="background:#f8fafc;padding:11px 14px;border-bottom:2px solid #e5e7eb;font-size:12px;font-weight:600;color:#6b7280">非致命性差错率（实际）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="background:#fff5f5">
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e293b">sebastianyow</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">77</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">3</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">3.90%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">1</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#f97316">1.30%</td>
+                </tr>
+                <tr style="background:#fff5f5">
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e293b">vincenttan</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">73</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">2</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">2.74%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">1</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#f97316">1.37%</td>
+                </tr>
+                <tr style="background:#fff5f5">
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e293b">jiahongaw</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">66</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">2</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#ef4444">3.03%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr style="background:#fff5f5">
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:600;color:#1e293b">zhijiekoay</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">55</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#f59e0b">1</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;font-weight:700;color:#f59e0b">1.82%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">1</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#f97316">1.82%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b">mujahid</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">1</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b">rickayhong</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">64</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b">kendrickfoo</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">6</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#1e293b">elwinchew</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px">42</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #f1f5f9;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr>
+                    <td style="text-align:left;padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#1e293b">yeungaangyeoh</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px">50</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#9ca3af">0.00%</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#9ca3af">0</td>
+                    <td style="padding:11px 14px;border-bottom:1px solid #e5e7eb;font-size:13px;color:#9ca3af">0.00%</td>
+                </tr>
+                <tr style="background:#f8fafc">
+                    <td style="text-align:left;padding:12px 14px;font-size:14px;font-weight:800;color:#1e293b">总计</td>
+                    <td style="padding:12px 14px;font-size:14px;font-weight:800;color:#1e293b">434</td>
+                    <td style="padding:12px 14px;font-size:14px;font-weight:800;color:#ef4444">8</td>
+                    <td style="padding:12px 14px;font-size:14px;font-weight:800;color:#ef4444">1.84%</td>
+                    <td style="padding:12px 14px;font-size:14px;font-weight:800;color:#1e293b">3</td>
+                    <td style="padding:12px 14px;font-size:14px;font-weight:800;color:#f97316">0.69%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #2563eb;">
+        <div class="card-title" style="font-size:15px;font-weight:800;color:#1e293b;margin-bottom:16px">💡 改善措施</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+            <div style="background:#eff6ff;border-radius:8px;padding:14px 16px">
+                <div style="font-size:13px;font-weight:700;color:#1d4ed8;margin-bottom:6px">📚 专业解答类差错（J类）</div>
+                <div style="font-size:13px;color:#374151;line-height:1.75">每周差错工单全组案例复盘，现场支撑及时讲解，重点强化出金规则、Cash Plus利息计算、GTC订单机制、活动补绑流程等高频出错场景的标准解答流程；同步在知识库中对关键信息点标注"必说项"，降低遗漏风险。</div>
+            </div>
+
+            <div style="background:#fff7ed;border-radius:8px;padding:14px 16px">
+                <div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:6px">💬 服务沟通规范类差错（B/C类）</div>
+                <div style="font-size:13px;color:#374151;line-height:1.75">梳理会话管理SOP，明确超时回复提醒机制、结束会话前强制确认是否已完成全部解答。</div>
+            </div>
+
+            <div style="background:#fef2f2;border-radius:8px;padding:14px 16px">
+                <div style="font-size:13px;font-weight:700;color:#b91c1c;margin-bottom:6px">🔒 合规类差错（F类）</div>
+                <div style="font-size:13px;color:#374151;line-height:1.75">开展专项情景演练，明确核身前禁止查看/透露任何账户信息的操作红线；制作"特殊场景处理指引"（如未开户客户无法验证时的替代方案话术），纳入每月合规抽查。</div>
+            </div>
+
+            <div style="background:#f0fdf4;border-radius:8px;padding:14px 16px">
+                <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:6px">✍️ 服务用语类差错（A类）</div>
+                <div style="font-size:13px;color:#374151;line-height:1.75">优化快捷用语命名分类，降低混淆可能性，提醒客服发送前养成二次确认习惯。</div>
+            </div>
+
+            <div style="background:#f8fafc;border-radius:8px;padding:14px 16px;border:1px solid #e2e8f0">
+                <div style="font-size:13px;font-weight:700;color:#475569;margin-bottom:6px">📋 持续跟进机制</div>
+                <div style="font-size:13px;color:#374151;line-height:1.75">不定时模拟测评，定期抽查工单，了解团队掌握程度，针对薄弱环节及时补强。</div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     问题分析与行动
+══════════════════════════════════════════════ -->
+<div id="summary" class="section">
+
+    <div class="sh">🔍 本月 AU 运营主要问题</div>
+
+    <div class="callout danger">
+        <span class="callout-icon">🏗️</span>
+        <div class="callout-text">
+            <strong>问题一：架构过渡期，人力承接转换</strong>
+            成都人力优化后，AU 目前正处于架构过渡期，MY 团队在逐步接管 AU 的咨询与转化业务。4月第四周起，国内人员不再承接电话，全员由 MY 人力支撑，过渡期间服务承接能力尚未完全到位。
+        </div>
+    </div>
+
+    <div class="callout warn">
+        <span class="callout-icon">📈</span>
+        <div class="callout-text">
+            <strong>问题二：咨询量增长叠加人力缺口</strong>
+            4月咨询量较3月增长 11.1%，在人力尚未补齐的情况下，量增与人减的双重压力进一步拉低了接通率。
+        </div>
+    </div>
+
+    <div class="sh" style="margin-top:32px">🚀 4–5月措施总结</div>
+
+    <div style="font-size:14px;font-weight:700;color:#374151;margin-bottom:12px">一、现有团队调整</div>
+
+    <div class="action-card">
+        <div class="ac-num">1</div>
+        <div class="ac-body">
+            <div class="ac-title">双签模式持续推进</div>
+            <div class="ac-desc">4月中旬已开始尝试电话在线最大化（电话＋在线、在线＋邮件）。</div>
+            <div class="ac-warn">⚠️ 需关注：双签模式增加员工压力，可能引发负面循环</div>
+        </div>
+    </div>
+
+    <div class="action-card">
+        <div class="ac-num">2</div>
+        <div class="ac-body">
+            <div class="ac-title">Mujahid 转岗安排</div>
+            <div class="ac-desc">已正式转岗至 AU 站点。</div>
+            <div class="ac-meta">
+                <span class="ac-tag">📌 进展：1周内达到 3仓在线能力</span>
+                <span class="ac-tag">🎯 当前定位：主力负责英文在线</span>
+                <span class="ac-tag">👥 其他成员：白班双签 1–2 仓华语</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-card">
+        <div class="ac-num">3</div>
+        <div class="ac-body">
+            <div class="ac-title">Mujahid 电话业务进展</div>
+            <div class="ac-desc">5月9日已安排尝试接电话，暂未全面上线。</div>
+            <div class="ac-meta">
+                <span class="ac-tag">⚠️ 原因：知识库标题多为中文，影响服务质量</span>
+                <span class="ac-tag">🔧 解决方案：@yuegeng（耿子悦）正在加急更新知识库</span>
+                <span class="ac-tag">📅 预计完成：1–2周</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="font-size:14px;font-weight:700;color:#374151;margin:24px 0 12px">二、人员补充</div>
+
+    <div class="callout info">
+        <span class="callout-icon">👥</span>
+        <div class="callout-text">
+            <strong>新员工入职计划</strong>
+            预计 5月有 <strong>3名新员工</strong>入职，将有效补充 AU 通道人力缺口，改善出勤不足问题。
+        </div>
+    </div>
+
+</div>
+
+<footer class="report-footer">
+    AU 咨询组月报 · 2026年4月 &nbsp;|&nbsp; 生成时间: 2026-05-13 &nbsp;|&nbsp; 数据来源: AU咨询组四月数据分析
+</footer>
+
+<script>
+Chart.register(ChartDataLabels);
+
+const LABELS = ['25年12月','26年1月','26年2月','26年3月','26年4月'];
+
+const FONT = { family: "'PingFang SC','Microsoft YaHei',sans-serif", size: 11 };
+
+const dlOff = (ctx, offset) => ({ display: true, color: ctx.dataset.borderColor || '#555', font: { ...FONT, weight: 'bold' }, offset: offset || 4 });
+
+/* ─── 在线 Chart 1: 客服人效 & 一次性解决率 ─── */
+new Chart(document.getElementById('onlineChart1'), {
+    data: {
+        labels: LABELS,
+        datasets: [
+            {
+                type: 'bar', label: '客服人效',
+                data: [138, 129, 140, 151, 153],
+                backgroundColor: 'rgba(59,130,246,0.55)',
+                borderColor: 'rgba(59,130,246,0.8)', borderWidth: 1,
+                yAxisID: 'yL', order: 2,
+                datalabels: { display: true, anchor: 'end', align: 'top', color: '#2563eb', font: { ...FONT, weight: 'bold' } }
+            },
+            {
+                type: 'line', label: '一次性解决率(%)',
+                data: [96.99, 96.18, 96.23, 95.44, 95.34],
+                borderColor: '#f97316', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#f97316', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR', order: 1,
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f97316', font: { ...FONT, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '人效', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT }, min: 100 },
+            yR: { position: 'right', title: { display: true, text: '%', font: FONT }, grid: { display: false }, ticks: { font: FONT, callback: v => v + '%' }, min: 93, max: 99 }
+        }
+    }
+});
+
+/* ─── 在线 Chart 2: 满意度 & 解决率 & 处理时长 ─── */
+new Chart(document.getElementById('onlineChart2'), {
+    data: {
+        labels: LABELS,
+        datasets: [
+            {
+                type: 'line', label: '非常满意度(%)',
+                data: [74.17, 74.04, 64.18, 65.63, 63.31],
+                borderColor: '#10b981', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yL',
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#10b981', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            },
+            {
+                type: 'line', label: '客户满意度(%)',
+                data: [90.06, 89.13, 85.07, 85.82, 81.25],
+                borderColor: '#3b82f6', backgroundColor: 'transparent', borderDash: [5, 4],
+                pointBackgroundColor: '#fff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yL',
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            },
+            {
+                type: 'line', label: '工单处理时长(min)',
+                data: [13.15, 14.14, 12.89, 12.30, 12.27],
+                borderColor: '#f59e0b', backgroundColor: 'transparent', borderDash: [4, 3],
+                pointBackgroundColor: '#fff', pointBorderColor: '#f59e0b', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR',
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '%', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT, callback: v => v + '%' }, min: 55, max: 100 },
+            yR: { position: 'right', title: { display: true, text: '分钟', font: FONT }, grid: { display: false }, ticks: { font: FONT }, min: 10, max: 16 }
+        }
+    }
+});
+
+/* ─── 电话 Chart 1: 客服人效 & 一次性解决率 ─── */
+new Chart(document.getElementById('phoneChart1'), {
+    data: {
+        labels: LABELS,
+        datasets: [
+            {
+                type: 'bar', label: '客服人效',
+                data: [71, 67, 70, 74, 75],
+                backgroundColor: 'rgba(59,130,246,0.55)',
+                borderColor: 'rgba(59,130,246,0.8)', borderWidth: 1,
+                yAxisID: 'yL', order: 2,
+                datalabels: { display: true, anchor: 'end', align: 'top', color: '#2563eb', font: { ...FONT, weight: 'bold' } }
+            },
+            {
+                type: 'line', label: '一次性解决率(%)',
+                data: [97.40, 97.00, 96.64, 96.27, 96.69],
+                borderColor: '#f97316', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#f97316', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR', order: 1,
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f97316', font: { ...FONT, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '人效', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT }, min: 50 },
+            yR: { position: 'right', title: { display: true, text: '%', font: FONT }, grid: { display: false }, ticks: { font: FONT, callback: v => v + '%' }, min: 94, max: 99 }
+        }
+    }
+});
+
+/* ─── 电话 Chart 2: 满意度 & 解决率 & 通话时长 ─── */
+new Chart(document.getElementById('phoneChart2'), {
+    data: {
+        labels: LABELS,
+        datasets: [
+            {
+                type: 'line', label: '非常满意度(%)',
+                data: [83.81, 84.17, 79.10, 80.76, 74.46],
+                borderColor: '#10b981', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yL',
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#10b981', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            },
+            {
+                type: 'line', label: '客户满意度(%)',
+                data: [88.04, 90.27, 84.55, 83.09, 87.80],
+                borderColor: '#3b82f6', backgroundColor: 'transparent', borderDash: [5, 4],
+                pointBackgroundColor: '#fff', pointBorderColor: '#3b82f6', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yL',
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#3b82f6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            },
+            {
+                type: 'line', label: '通话时长(min)',
+                data: [6.33, 6.48, 6.53, 6.27, 6.20],
+                borderColor: '#f59e0b', backgroundColor: 'transparent', borderDash: [4, 3],
+                pointBackgroundColor: '#fff', pointBorderColor: '#f59e0b', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR',
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f59e0b', font: { ...FONT, weight: 'bold' }, formatter: v => v + '分' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '%', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT, callback: v => v + '%' }, min: 70, max: 100 },
+            yR: { position: 'right', title: { display: true, text: '分钟', font: FONT }, grid: { display: false }, ticks: { font: FONT }, min: 5.5, max: 7.5 }
+        }
+    }
+});
+
+/* ─── 质检差错 Chart ─── */
+new Chart(document.getElementById('qcChart'), {
+    type: 'line',
+    data: {
+        labels: LABELS,
+        datasets: [
+            {
+                label: '在线差错率',
+                data: [0.33, 0.70, 1.75, 0.99, 2.65],
+                borderColor: '#f97316', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#f97316', pointBorderWidth: 2, pointRadius: 6,
+                tension: 0.3, borderWidth: 2.5,
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f97316', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            },
+            {
+                label: '电话差错率',
+                data: [0.56, 1.29, 0.32, 0.20, 0.90],
+                borderColor: '#8b5cf6', backgroundColor: 'transparent', borderDash: [6, 4],
+                pointBackgroundColor: '#fff', pointBorderColor: '#8b5cf6', pointBorderWidth: 2, pointRadius: 6,
+                tension: 0.3, borderWidth: 2.5,
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#8b5cf6', font: { ...FONT, weight: 'bold' }, formatter: v => v + '%' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } },
+            datalabels: {}
+        },
+        scales: {
+            x: { grid: { color: '#f1f5f9' }, ticks: { font: FONT } },
+            y: {
+                grid: { color: '#f1f5f9' }, ticks: { font: FONT, callback: v => v + '%' },
+                min: 0, max: 3.5,
+                title: { display: true, text: '差错率 (%)', font: FONT }
+            }
+        }
+    }
+});
+
+/* ─── Tab switch ─── */
+function switchTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
