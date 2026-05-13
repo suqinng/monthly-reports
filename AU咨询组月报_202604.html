@@ -170,16 +170,24 @@
         </div>
     </div>
 
-    <!-- Charts -->
+    <!-- Charts row 1 -->
     <div class="charts-row">
         <div class="chart-card">
-            <div class="chart-title">客服人效 &amp; 一次性解决率</div>
+            <div class="chart-title">总咨询数 &amp; 30s接通率</div>
             <div class="chart-wrap"><canvas id="onlineChart1"></canvas></div>
         </div>
         <div class="chart-card">
             <div class="chart-title">满意度 &amp; 一次性解决率 &amp; 工单处理时长</div>
             <div class="chart-wrap"><canvas id="onlineChart2"></canvas></div>
         </div>
+    </div>
+    <!-- Charts row 2 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title">AU 在线数据（总咨询数 &amp; 30s接通率）</div>
+            <div class="chart-wrap"><canvas id="onlineChartNew"></canvas></div>
+        </div>
+        <div style="flex:1"></div>
     </div>
 
     <!-- 人效表 -->
@@ -278,16 +286,24 @@
         </div>
     </div>
 
-    <!-- Charts -->
+    <!-- Charts row 1 -->
     <div class="charts-row">
         <div class="chart-card">
-            <div class="chart-title">客服人效 &amp; 一次性解决率</div>
+            <div class="chart-title">呼入量 &amp; 接通率</div>
             <div class="chart-wrap"><canvas id="phoneChart1"></canvas></div>
         </div>
         <div class="chart-card">
             <div class="chart-title">满意度 &amp; 一次性解决率 &amp; 通话时长</div>
             <div class="chart-wrap"><canvas id="phoneChart2"></canvas></div>
         </div>
+    </div>
+    <!-- Charts row 2 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title">AU 电话数据（呼入量 &amp; 接通率）</div>
+            <div class="chart-wrap"><canvas id="phoneChartNew"></canvas></div>
+        </div>
+        <div style="flex:1"></div>
     </div>
 
     <!-- 人效表 -->
@@ -882,6 +898,88 @@ new Chart(document.getElementById('qcChart'), {
                 min: 0, max: 3.5,
                 title: { display: true, text: '差错率 (%)', font: FONT }
             }
+        }
+    }
+});
+
+/* ─── 在线 新增: AU在线数据（总咨询数 & 30s接通率）─── */
+new Chart(document.getElementById('onlineChartNew'), {
+    data: {
+        labels: ['2025-12','2026-01','2026-02','2026-03','2026-04'],
+        datasets: [
+            {
+                type: 'bar', label: '总咨询数',
+                data: [2429, 1990, 1592, 1720, 1911],
+                backgroundColor: 'rgba(59,130,246,0.6)',
+                borderColor: 'rgba(59,130,246,0.85)', borderWidth: 1,
+                yAxisID: 'yL', order: 2,
+                datalabels: { display: true, anchor: 'end', align: 'top', color: '#1d4ed8', font: { ...FONT, weight: 'bold' } }
+            },
+            {
+                type: 'line', label: '30s接通率(%)',
+                data: [95.16, 96.99, 98.13, 98.57, 89.62],
+                borderColor: '#f97316', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#f97316', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR', order: 1,
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f97316', font: { ...FONT, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '次数', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT }, min: 0 },
+            yR: { position: 'right', title: { display: true, text: '%', font: FONT }, grid: { display: false }, ticks: { font: FONT, callback: v => v + '%' }, min: 84, max: 100 }
+        }
+    }
+});
+
+/* ─── 电话 新增: AU电话数据（呼入量 & 接通率）─── */
+new Chart(document.getElementById('phoneChartNew'), {
+    data: {
+        labels: ['2026-01','2026-02','2026-03','2026-04'],
+        datasets: [
+            {
+                type: 'bar', label: '呼入次数',
+                data: [4114, 3198, 3567, 3701],
+                backgroundColor: 'rgba(59,130,246,0.6)',
+                borderColor: 'rgba(59,130,246,0.85)', borderWidth: 1,
+                yAxisID: 'yL', order: 3,
+                datalabels: { display: true, anchor: 'end', align: 'top', color: '#1d4ed8', font: { ...FONT, weight: 'bold' } }
+            },
+            {
+                type: 'bar', label: '呼入接通次数',
+                data: [3482, 2861, 3078, 2539],
+                backgroundColor: 'rgba(34,197,94,0.6)',
+                borderColor: 'rgba(34,197,94,0.85)', borderWidth: 1,
+                yAxisID: 'yL', order: 3,
+                datalabels: { display: true, anchor: 'end', align: 'top', color: '#15803d', font: { ...FONT, weight: 'bold' } }
+            },
+            {
+                type: 'line', label: '接通率(%)',
+                data: [84.64, 89.46, 86.29, 68.60],
+                borderColor: '#f97316', backgroundColor: 'transparent',
+                pointBackgroundColor: '#fff', pointBorderColor: '#f97316', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR', order: 1,
+                datalabels: { display: true, anchor: 'top', align: 'top', color: '#f97316', font: { ...FONT, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' }
+            },
+            {
+                type: 'line', label: '10秒接通率(%)',
+                data: [70.18, 79.80, 73.51, 49.99],
+                borderColor: '#8b5cf6', backgroundColor: 'transparent', borderDash: [5, 4],
+                pointBackgroundColor: '#fff', pointBorderColor: '#8b5cf6', pointBorderWidth: 2, pointRadius: 5,
+                tension: 0.3, yAxisID: 'yR', order: 1,
+                datalabels: { display: true, anchor: 'bottom', align: 'bottom', color: '#8b5cf6', font: { ...FONT, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' }
+            }
+        ]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: FONT } }, datalabels: {} },
+        scales: {
+            yL: { position: 'left', title: { display: true, text: '次数', font: FONT }, grid: { color: '#f1f5f9' }, ticks: { font: FONT }, min: 0 },
+            yR: { position: 'right', title: { display: true, text: '%', font: FONT }, grid: { display: false }, ticks: { font: FONT, callback: v => v + '%' }, min: 0, max: 100 }
         }
     }
 });
